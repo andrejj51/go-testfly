@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var cafeList = map[string][]string{
@@ -61,4 +62,21 @@ func TestMainHendlerWhenStatusOkAndBodyNoNil(t *testing.T) {
 
 	// тело ответа не пустое
 	assert.NotEmpty(t, responseRecorder.Body)
+}
+
+// Город, который передаётся в параметре city, не поддерживается
+// Сервис возвращает код ответа 400 и ошибку wrong city value в теле ответа
+func TestMainHandlerWhenNotCity(t *testing.T) {
+	req := httptest.NewRequest("GET", "/cafe?count=4&city=omsk", nil)
+
+	responseRecorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(mainHandle)
+	handler.ServeHTTP(responseRecorder, req)
+
+	// Сервис возвращает код ответа 400
+	require.Equal(t, http.StatusBadRequest, responseRecorder.Code)
+
+	// wrong city value в теле ответа
+	assert.Equal(t, "wrong city value", responseRecorder.Body.String())
+
 }
