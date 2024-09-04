@@ -80,3 +80,21 @@ func TestMainHandlerWhenNotCity(t *testing.T) {
 	assert.Equal(t, "wrong city value", responseRecorder.Body.String())
 
 }
+
+// Если в параметре count указано больше, чем есть всего, должны вернуться все доступные кафе
+func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
+	// Всего кафе в городе moscow
+	totalCount := 4
+
+	req := httptest.NewRequest("GET", "/cafe?count=5&city=moscow", nil)
+
+	responseRecorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(mainHandle)
+	handler.ServeHTTP(responseRecorder, req)
+
+	body := responseRecorder.Body.String()
+	list := strings.Split(body, ",")
+
+	// Все доступные кафе
+	assert.Len(t, list, totalCount)
+}
